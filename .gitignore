@@ -3,3 +3,5 @@
 app/dashboard/mqtt.properties
 
 notebooks/.ipynb_checkpoints/*
+
+fake_data/

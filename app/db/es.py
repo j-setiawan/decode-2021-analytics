@@ -7,20 +7,20 @@ emotions = ['happy', 'sad', 'confused', 'frustrated']
 
 with open('db.properties') as fp:
     lines = fp.readlines()
-    cloudId = lines[0].strip()
-    apiKey = lines[1].strip()
+    hostname = lines[0].strip()
+    username = lines[1].strip()
+    password = lines[2].strip()
 
 es = Elasticsearch(
-    cloud_id=cloudId,
-    api_key=apiKey
+    hostname,
+    http_auth=(username, password)
 )
 
 
 def from_solace(s_index, payload):
     payload['timestamp'] = datetime.now()
     doc = {s_index: payload}
-    res = es.index(index=s_index, body=doc)
-    print(res['result'])
+    es.index(index=s_index, body=doc)
 
 
 # for i in range(500):

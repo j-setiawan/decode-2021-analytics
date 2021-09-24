@@ -1,3 +1,5 @@
 .DS_Store
 .idea
 app/db/db.properties
+
+notebooks/.ipynb_checkpoints/*

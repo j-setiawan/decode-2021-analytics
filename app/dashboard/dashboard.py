@@ -12,8 +12,7 @@ from app.eventing.mqtt import MqttClient
 genders = ['Female', 'Male', 'LGBTQ', 'Other']
 languages = ['English', 'French', 'Mandarin', 'Tagalog', 'Hindi', 'Punjabi', 'Swahili']
 centres = ['East York', 'Durham', 'Guelph', 'Kitchener', 'Meadowvale', 'Richmond Hill', 'Willowdale']
-table_columns = ['ID', 'Centre', 'Participant Firstname', 'Participant Last Name', 'Participant Gender', 'Participant Grade', 'Participant in ESL/FSL',
-                 'Home Language']
+table_columns = ['Student_ID', 'name', 'centre', 'gender', 'grade', 'ESL/FSL', 'native language']
 graph_axis = ['10-30-2020', '12-15-2020', '1-10-2020', '2-5-2020', '3-10-2020', '4-5-2020']
 
 
@@ -23,19 +22,17 @@ def on_message(client, userdata, msg):
     if msg.topic.startswith('user'):
         student = json.loads(msg.payload.decode('utf-8'))
         students.append({
-            'ID': student['id'],
-            'Centre': centres[randrange(len(centres))],
-            'Participant Firstname': student['name'].split()[0],
-            'Participant Last Name': student['name'].split()[1],
-            'Participant Gender': genders[randrange(len(genders))],
-            'Participant Grade': f'Grade {randrange(1, 8)}',
-            'Participant in ESL/FSL': 'Yes' if randrange(0, 2) == 1 else 'No',
-            'Home Language': languages[randrange(len(languages))],
-            'Participant Fullname': student['name'],
+            'Student_ID': student['id'],
+            'centre': centres[randrange(len(centres))],
+            'name': student['name'],
+            'gender': genders[randrange(len(genders))],
+            'grade': f'Grade {randrange(1, 8)}',
+            'ESL/FSL': 'Yes' if randrange(0, 2) == 1 else 'No',
+            'native language': languages[randrange(len(languages))],
         })
 
         grades.append({
-            'Participant Fullname': student['name'],
+            'name': student['name'],
             '10-30-2020': randrange(0, 101),
             '12-15-2020': randrange(0, 101),
             '1-10-2020': randrange(0, 101),
@@ -87,10 +84,10 @@ def update_table(n):
               Input('interval-component', 'n_intervals'))
 def update_graph(selected, n):
     if selected is not None:
-        grade = [g for g in grades if g['Participant Fullname'] == selected][0]
-        trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'Participant Fullname'], name=grade['Participant Fullname'])]
+        grade = [g for g in grades if g['name'] == selected][0]
+        trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'name'], name=grade['name'])]
     else:
-        trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'Participant Fullname'], name=grade['Participant Fullname']) for grade in grades]
+        trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'name'], name=grade['name']) for grade in grades]
 
     return {'data': trace, 'layout': go.Layout(title='Student Test Scores', xaxis={'title': 'dates'}, yaxis={'title': 'Test Score Percentage'})}
 

@@ -1,4 +1,4 @@
-def per_lesson_stats(df, metric=None)
+def per_lesson_stats(df, metric):
 
     """
 
@@ -11,13 +11,10 @@ def per_lesson_stats(df, metric=None)
 
     * df (pandas dataframe):
     is a dataframe containing the lesson data from a single day.
+    i.e. df = pd.read_csv(path_to_lessons + lesson_file_name, index_col=0)
 
-     i.e. df = pd.read_csv(path_to_lessons + lesson_file_name, index_col=0)
-
-
-    Kwargs:
     * metric_string (string):
-    a string specififying the analysis.  one of "sentiment", ...
+    a string specififying the analysis.  one of "sentiment" or "quizzes"
 
     Returns:
 
@@ -25,10 +22,8 @@ def per_lesson_stats(df, metric=None)
    
 
     """
- 
 
     if metric=="sentiment":
-
 
         has_sentiment = df.columns.str.startswith('n_')
         cols = df.columns[has_sentiment]
@@ -40,3 +35,16 @@ def per_lesson_stats(df, metric=None)
 
 
         return sentiment_values
+
+    if metric=="quizzes":
+
+        has_quiz = df.columns.str.startswith('quiz')
+        cols = df.columns[has_quiz]
+        
+        quiz_scores = df[cols].sum()
+        quiz_scores.name = 'number of correct responses'
+        quiz_scores = quiz_scores.to_frame()
+
+        quiz_scores['percent of students answering correctly'] = 100*quiz_scores/df.shape[0]
+
+        return quiz_scores

@@ -13,7 +13,7 @@ genders = ['Female', 'Male', 'LGBTQ', 'Other']
 languages = ['English', 'French', 'Mandarin', 'Tagalog', 'Hindi', 'Punjabi', 'Swahili']
 centres = ['East York', 'Durham', 'Guelph', 'Kitchener', 'Meadowvale', 'Richmond Hill', 'Willowdale']
 table_columns = ['Student_ID', 'name', 'centre', 'gender', 'grade', 'ESL/FSL', 'native language']
-graph_axis = ['10-30-2020', '12-15-2020', '1-10-2020', '2-5-2020', '3-10-2020', '4-5-2020']
+graph_axis = ['quiz_1', 'quiz_2', 'quiz_3', 'quiz_4', 'quiz_5', 'exam']
 
 
 def on_message(client, userdata, msg):
@@ -31,15 +31,19 @@ def on_message(client, userdata, msg):
             'native language': languages[randrange(len(languages))],
         })
 
-        grades.append({
-            'name': student['name'],
-            '10-30-2020': randrange(0, 101),
-            '12-15-2020': randrange(0, 101),
-            '1-10-2020': randrange(0, 101),
-            '2-5-2020': randrange(0, 101),
-            '3-10-2020': randrange(0, 101),
-            '4-5-2020': randrange(0, 101),
-        })
+        for i in range(1, 6):
+            lessons[i].append({
+                'name': student['name'],
+                'exam': randrange(0, 101),
+                'quiz_1': randrange(0, 101),
+                'quiz_2': randrange(0, 101),
+                'quiz_3': randrange(0, 101),
+                'quiz_4': randrange(0, 101),
+                'quiz_5': randrange(0, 101),
+                'happy': randrange(0, 10),
+                'sad': randrange(0, 10),
+                'neutral': randrange(0, 10),
+            })
 
         name_options.append({'label': student['name'], 'value': student['name']})
 
@@ -54,7 +58,7 @@ mqtt = MqttClient(hostname, username, password, on_message)
 
 students = []
 name_options = []
-grades = []
+lessons = {1: [], 2: [], 3: [], 4: [], 5: []}
 
 app = dash.Dash(__name__)
 
@@ -64,7 +68,9 @@ app.layout = html.Div([dash_table.DataTable(
     data=students,
 ),
     dcc.Graph(id='graph'),
+    dcc.Graph(id='graph2'),
     dcc.Dropdown(id='student-picker', options=name_options),
+    dcc.Dropdown(id='lesson-picker', options=[{'label': str(i), 'value': str(i)} for i in range(1, 6)], value='1'),
     dcc.Interval(
         id='interval-component',
         interval=1 * 1000,  # in milliseconds
@@ -81,15 +87,26 @@ def update_table(n):
 
 @app.callback(Output('graph', 'figure'),
               Input('student-picker', 'value'),
+              Input('lesson-picker', 'value'),
               Input('interval-component', 'n_intervals'))
-def update_graph(selected, n):
-    if selected is not None:
-        grade = [g for g in grades if g['name'] == selected][0]
+def update_graph(student, lesson, n):
+    grades = lessons[int(lesson)]
+
+    if student is not None:
+        grade = [g for g in grades if g['name'] == student][0]
         trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'name'], name=grade['name'])]
     else:
         trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'name'], name=grade['name']) for grade in grades]
 
     return {'data': trace, 'layout': go.Layout(title='Student Test Scores', xaxis={'title': 'dates'}, yaxis={'title': 'Test Score Percentage'})}
+
+
+@app.callback(Output('graph2', 'figure'), [Input('student-picker', 'value'), Input('lesson-picker', 'value')])
+def update_figure2(selected_name, selected_lesson):
+    lesson = [l for l in lessons[int(selected_lesson)] if l['name'] == selected_name][0]
+    data = [go.Bar(x=['happy', 'sad', 'neutral'], y=[v for k, v in lesson.items() if k != 'name'], name=lesson['name'])]
+    return {'data': data,
+            'layout': go.Layout(title=f'{selected_name} Sentiment for Lesson {selected_lesson}', xaxis={'title': 'Sentiments'}, yaxis={'title': 'Frequency'})}
 
 
 @app.callback(Output('student-picker', 'options'),

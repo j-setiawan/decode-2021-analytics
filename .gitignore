@@ -1,6 +1,6 @@
 .DS_Store
 .idea
-app/dashboard/mqtt.properties
+app/mqtt.properties
 
 notebooks/.ipynb_checkpoints/*
 

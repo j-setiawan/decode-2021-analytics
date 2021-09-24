@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 from dash import dash_table, dcc, html
 from dash.dependencies import Input, Output
 
-from app.eventing.mqtt import MqttClient
+from eventing.mqtt import MqttClient
 
 genders = ['Female', 'Male', 'LGBTQ', 'Other']
 languages = ['English', 'French', 'Mandarin', 'Tagalog', 'Hindi', 'Punjabi', 'Swahili']
@@ -99,4 +99,4 @@ def update_picker(n):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(host="0.0.0.0", debug=True)

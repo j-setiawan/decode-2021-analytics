@@ -93,12 +93,14 @@ def update_graph(student, lesson, n):
     grades = lessons[int(lesson)]
 
     if student is not None:
+        title = f'{student} Scores for Lesson {lesson}'
         grade = [g for g in grades if g['name'] == student][0]
         trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'name'], name=grade['name'])]
     else:
+        title = f'Student Scores for Lesson {lesson}'
         trace = [go.Bar(x=graph_axis, y=[v for k, v in grade.items() if k != 'name'], name=grade['name']) for grade in grades]
 
-    return {'data': trace, 'layout': go.Layout(title='Student Test Scores', xaxis={'title': 'dates'}, yaxis={'title': 'Test Score Percentage'})}
+    return {'data': trace, 'layout': go.Layout(title=title, xaxis={'title': 'Tests'}, yaxis={'title': 'Test Score Percentage'})}
 
 
 @app.callback(Output('graph2', 'figure'), [Input('student-picker', 'value'), Input('lesson-picker', 'value')])
